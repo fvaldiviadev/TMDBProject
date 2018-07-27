@@ -8,7 +8,7 @@ import retrofit2.http.GET;
 import retrofit2.http.QueryMap;
 
 public interface TheMovieDB_MovieService {
-    @GET("/popular")
+    @GET("/3/movie/popular")
     Call<PopularMoviesFeed> getData(
             @QueryMap Map<String, String> parameters
     );

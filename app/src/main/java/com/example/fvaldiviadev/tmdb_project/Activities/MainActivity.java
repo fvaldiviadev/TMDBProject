@@ -70,6 +70,7 @@ public class MainActivity  extends AppCompatActivity {
 
         // set the adapter object to the Recyclerview
         mRecyclerView.setAdapter(mAdapter);
+        mAdapter.setLoading(true);
 
 
         if (popularMovieList.isEmpty()) {
@@ -84,46 +85,25 @@ public class MainActivity  extends AppCompatActivity {
         mAdapter.setOnLoadMoreMoviesListener(new OnLoadMoreMoviesListener() {
             @Override
             public void onLoadMoreMovies() {
-                //add null , so the adapter will check view_type and show progress bar at bottom
-                popularMovieList.add(null);
-                mAdapter.notifyItemInserted(popularMovieList.size() - 1);
 
-                loadNextMovies(page++);
-//                //TODO
-//                //eliminar progress item
-//                //cargar pagina siguiente
-//                //añadir a la lista popularMovieList
-//                handler.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        //   remove progress item
-//                        popularMovieList.remove(popularMovieList.size() - 1);
-//                        mAdapter.notifyItemRemoved(popularMovieList.size());
-//                        //add items one by one
-//                        int start = popularMovieList.size();
-//                        int end = start + 20;
-//
-//                        for (int i = start + 1; i <= end; i++) {
-//                            popularMovieList.add(new PopularMovie("Student " + i, "AndroidStudent" + i + "@gmail.com"));
-//                            mAdapter.notifyItemInserted(popularMovieList.size());
-//                        }
-//                        mAdapter.setLoaded();
-//                        //or you can add all at once but do not forget to call mAdapter.notifyDataSetChanged();
-//                    }
-//                }, 2000);
+                loadNextMovies(++page);
 
             }
         });
-
     }
 
     private void loadNextMovies(int page){
+        popularMovieList.add(null);
+        if(mAdapter!=null) {
+            mAdapter.notifyItemInserted(popularMovieList.size() - 1);
+        }
+
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.API_GET_POPULAR_MOVIES)
+                .baseUrl(Constants.API_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
@@ -148,18 +128,18 @@ public class MainActivity  extends AppCompatActivity {
 
                         List<PopularMovie> newPopularMovieList= data.getPopularMovies();
                         for(int i=0;i<newPopularMovieList.size();i++) {
-                            popularMovieList.add(newPopularMovieList.get(i));
+                            mAdapter.addItem(newPopularMovieList.get(i));
                         }
 
-                        mAdapter.setLoaded();
+                        mAdapter.notifyDataSetChanged();
 
+                        mAdapter.setLoading(false);
 
                         break;
                     case 401:
-
                         break;
                     default:
-
+                        tvEmptyView.append(" - Error: "+response.code() + " - " + response.message() + " : " + call.request().url().url());
                         break;
                 }
             }

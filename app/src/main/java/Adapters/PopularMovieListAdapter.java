@@ -5,10 +5,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.fvaldiviadev.tmdb_project.R;
 
 import java.util.List;
@@ -64,6 +65,11 @@ public class PopularMovieListAdapter extends RecyclerView.Adapter {
             }
         }
 
+        public void addItem(PopularMovie popularMovie){
+            popularMovieList.add(popularMovie);
+            notifyItemInserted(popularMovieList.size());
+        }
+
         @Override
         public int getItemViewType(int position) {
             return popularMovieList.get(position) != null ? VIEW_ITEM : VIEW_PROG;
@@ -95,15 +101,19 @@ public class PopularMovieListAdapter extends RecyclerView.Adapter {
 
                 ((PopularMovieViewHolder) holder).tvTitle.setText(popularMovie.getTitle());
 
-                ((PopularMovieViewHolder) holder).popularMovie = popularMovie;
+                Glide.with(holder.itemView.getContext())
+                        .load("https://image.tmdb.org/t/p/w500/"+popularMovie.getPosterPath())
+                        .centerCrop()
+                        .crossFade()
+                        .into(((PopularMovieViewHolder) holder).ivMovie);
 
             } else {
                 ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
             }
         }
 
-        public void setLoaded() {
-            loading = false;
+        public void setLoading(boolean loading) {
+            this.loading = loading;
         }
 
         @Override
@@ -119,20 +129,18 @@ public class PopularMovieListAdapter extends RecyclerView.Adapter {
         //
         public static class PopularMovieViewHolder extends RecyclerView.ViewHolder {
             public TextView tvTitle;
-
-            public PopularMovie popularMovie;
+            public ImageView ivMovie;
 
             public PopularMovieViewHolder(View v) {
                 super(v);
-                tvTitle = (TextView) v.findViewById(R.id.tvTitle);
+                tvTitle = (TextView) v.findViewById(R.id.tv_titlepopularmovie);
+                ivMovie=(ImageView) v.findViewById(R.id.iv_imagepopularmovie);
 
                 v.setOnClickListener(new View.OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(v.getContext(),
-                                "OnClick :" + popularMovie.getTitle(),
-                                Toast.LENGTH_SHORT).show();
+
 
                     }
                 });
@@ -147,4 +155,6 @@ public class PopularMovieListAdapter extends RecyclerView.Adapter {
                 progressBar = (ProgressBar) v.findViewById(R.id.pb_popularmovielist);
             }
         }
+
+
 }
