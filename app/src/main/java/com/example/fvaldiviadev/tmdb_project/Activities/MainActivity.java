@@ -16,11 +16,13 @@ import android.view.View;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import Adapters.PopularMovieListAdapter;
 import Interfaces.OnLoadMoreMoviesListener;
-import Interfaces.RestClient;
+import Interfaces.TheMovieDB_MovieService;
 import Pojo.PopularMovie;
 import Pojo.PopularMoviesFeed;
 import Utils.Constants;
@@ -121,12 +123,16 @@ public class MainActivity  extends AppCompatActivity {
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.API_GET_POPULAR_MOVIES+page+"/")
+                .baseUrl(Constants.API_GET_POPULAR_MOVIES)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
-        RestClient restClient = retrofit.create(RestClient.class);
-        Call<PopularMoviesFeed> call = restClient.getData();
+        TheMovieDB_MovieService theMovieDBMovieService = retrofit.create(TheMovieDB_MovieService.class);
+        Map<String, String> data = new HashMap<>();
+        data.put("api_key", Constants.API_KEY);
+        data.put("language", Constants.LANGUAGE_GET_REQUEST);
+        data.put("page", String.valueOf(page));
+        Call<PopularMoviesFeed> call = theMovieDBMovieService.getData(data);
 
         call.enqueue(new Callback<PopularMoviesFeed>() {
             @Override
