@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -17,8 +16,9 @@ import java.util.List;
 
 import Interfaces.OnLoadMoreMoviesListener;
 import Pojo.FoundMovie;
+import Utils.Constants;
 
-public class SearchMovieListAdapter extends RecyclerView.Adapter  {
+public class SearchMovieListAdapter extends RecyclerView.Adapter {
 
     private final int VIEW_ITEM = 1;
 
@@ -30,7 +30,6 @@ public class SearchMovieListAdapter extends RecyclerView.Adapter  {
     private int lastVisibleItem, totalItemCount;
     private boolean loading;
     private OnLoadMoreMoviesListener onLoadMoreMoviesListener;
-
 
 
     public SearchMovieListAdapter(RecyclerView recyclerView) {
@@ -65,25 +64,25 @@ public class SearchMovieListAdapter extends RecyclerView.Adapter  {
         }
     }
 
-    public void addItem(FoundMovie foundMovie){
+    public void addItem(FoundMovie foundMovie) {
         foundMovieList.add(foundMovie);
         notifyItemInserted(foundMovieList.size());
     }
 
-    public void clearList(){
+    public void clearList() {
         foundMovieList.clear();
         notifyDataSetChanged();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return foundMovieList.get(position) != null ? VIEW_ITEM:null;
+        return foundMovieList.get(position) != null ? VIEW_ITEM : null;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                       int viewType) {
-        RecyclerView.ViewHolder vh=null;
+        RecyclerView.ViewHolder vh = null;
         if (viewType == VIEW_ITEM) {
             View v = LayoutInflater.from(parent.getContext()).inflate(
                     R.layout.item_list_search_movie, parent, false);
@@ -97,19 +96,19 @@ public class SearchMovieListAdapter extends RecyclerView.Adapter  {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof SearchMovieListAdapter.FoundMovieViewHolder) {
 
-            FoundMovie foundMovie= foundMovieList.get(position);
+            FoundMovie foundMovie = foundMovieList.get(position);
 
             ((FoundMovieViewHolder) holder).tvTitle.setText(foundMovie.getTitle());
-            String dateString=foundMovie.getReleaseDate();
-            String year="-";
-            if(dateString!=null && dateString.length()>4) {
+            String dateString = foundMovie.getReleaseDate();
+            String year = "-";
+            if (dateString != null && dateString.length() > 4) {
                 year = dateString.substring(0, 4);
             }
             ((FoundMovieViewHolder) holder).tvDate.setText(year);
             ((FoundMovieViewHolder) holder).tvOverview.setText(foundMovie.getOverview());
 
             Glide.with(holder.itemView.getContext())
-                    .load("https://image.tmdb.org/t/p/w500/"+foundMovie.getPosterPath())
+                    .load(Constants.URL_IMAGE_DEFAULT + foundMovie.getPosterPath())
                     .into(((FoundMovieViewHolder) holder).ivMovie);
 
         }
@@ -125,7 +124,6 @@ public class SearchMovieListAdapter extends RecyclerView.Adapter  {
     }
 
 
-    //
     public static class FoundMovieViewHolder extends RecyclerView.ViewHolder {
         public TextView tvTitle;
         public ImageView ivMovie;
@@ -135,7 +133,7 @@ public class SearchMovieListAdapter extends RecyclerView.Adapter  {
         public FoundMovieViewHolder(View v) {
             super(v);
             tvTitle = (TextView) v.findViewById(R.id.tv_titlefoundmovie);
-            ivMovie=(ImageView) v.findViewById(R.id.iv_imagefoundmovie);
+            ivMovie = (ImageView) v.findViewById(R.id.iv_imagefoundmovie);
             tvDate = (TextView) v.findViewById(R.id.tv_yearfoundmovie);
             tvOverview = (TextView) v.findViewById(R.id.tv_overviewfoundmovie);
 

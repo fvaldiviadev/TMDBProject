@@ -1,6 +1,5 @@
 package com.example.fvaldiviadev.tmdb_project.Activities;
 
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import Adapters.PopularMovieListAdapter;
-import Fragments.SearchFragment;
 import Interfaces.OnLoadMoreMoviesListener;
 import Interfaces.TheMovieDB_MovieService;
 import Pojo.PopularMovie;
@@ -37,70 +35,80 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity  extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
 
     private TextView tvEmptyView;
-    private RecyclerView mRecyclerView;
-    private PopularMovieListAdapter mAdapter;
-    private LinearLayoutManager mLayoutManager;
+    private RecyclerView rvPopularMovieList;
+    private PopularMovieListAdapter adapter;
+    private LinearLayoutManager linearLayoutManager;
 
     private List<PopularMovie> popularMovieList;
     private int page;
+    private int totalPages;
 
     protected Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_main);
-        tvEmptyView = (TextView) findViewById(R.id.tv_nomovies);
-        mRecyclerView = (RecyclerView) findViewById(R.id.rv_popularmovielist);
-        popularMovieList = new ArrayList<PopularMovie>();
-        handler = new Handler();
+        setContentView(R.layout.activity_main);
 
-        page=1;
+        initComponents();
 
         loadNextMovies(page);
 
-        mRecyclerView.setHasFixedSize(true);
+        setAdapter();
 
-        mLayoutManager = new LinearLayoutManager(this);
 
-        // use a linear layout manager
-        mRecyclerView.setLayoutManager(mLayoutManager);
+    }
 
-        // create an Object for Adapter
-        mAdapter = new PopularMovieListAdapter(popularMovieList, mRecyclerView);
+    private void initComponents() {
+        tvEmptyView = (TextView) findViewById(R.id.tv_nomovies);
+        rvPopularMovieList = (RecyclerView) findViewById(R.id.rv_popularmovielist);
+        popularMovieList = new ArrayList<PopularMovie>();
+        handler = new Handler();
 
-        // set the adapter object to the Recyclerview
-        mRecyclerView.setAdapter(mAdapter);
-        mAdapter.setLoading(true);
+        rvPopularMovieList.setHasFixedSize(true);
+        linearLayoutManager = new LinearLayoutManager(this);
+        rvPopularMovieList.setLayoutManager(linearLayoutManager);
+
+        page = 1;
+    }
+
+    private void setAdapter() {
+        adapter = new PopularMovieListAdapter(popularMovieList, rvPopularMovieList);
+
+        rvPopularMovieList.setAdapter(adapter);
+
+        adapter.setLoading(true);
 
 
         if (popularMovieList.isEmpty()) {
-            mRecyclerView.setVisibility(View.GONE);
+            rvPopularMovieList.setVisibility(View.GONE);
             tvEmptyView.setVisibility(View.VISIBLE);
 
         } else {
-            mRecyclerView.setVisibility(View.VISIBLE);
+            rvPopularMovieList.setVisibility(View.VISIBLE);
             tvEmptyView.setVisibility(View.GONE);
         }
 
-        mAdapter.setOnLoadMoreMoviesListener(new OnLoadMoreMoviesListener() {
+        adapter.setOnLoadMoreMoviesListener(new OnLoadMoreMoviesListener() {
             @Override
             public void onLoadMoreMovies() {
-
-                loadNextMovies(++page);
+                int nextPage = page + 1;
+                if (nextPage < totalPages) {
+                    loadNextMovies(++page);
+                }
 
             }
         });
     }
 
-    private void loadNextMovies(int page){
+    private void loadNextMovies(int page) {
         popularMovieList.add(null);
-        if(mAdapter!=null) {
-            mAdapter.notifyItemInserted(popularMovieList.size() - 1);
+        if (adapter != null) {
+            adapter.notifyItemInserted(popularMovieList.size() - 1);
         }
 
         Gson gson = new GsonBuilder()
@@ -127,24 +135,26 @@ public class MainActivity  extends AppCompatActivity {
 
                         //   remove progress item
                         popularMovieList.remove(popularMovieList.size() - 1);
-                        mAdapter.notifyItemRemoved(popularMovieList.size());
+                        adapter.notifyItemRemoved(popularMovieList.size());
 
                         PopularMoviesFeed data = response.body();
 
-                        List<PopularMovie> newPopularMovieList= data.getPopularMovies();
-                        for(int i=0;i<newPopularMovieList.size();i++) {
-                            mAdapter.addItem(newPopularMovieList.get(i));
+                        totalPages = data.getTotalPages();
+
+                        List<PopularMovie> newPopularMovieList = data.getPopularMovies();
+                        for (int i = 0; i < newPopularMovieList.size(); i++) {
+                            adapter.addItem(newPopularMovieList.get(i));
                         }
 
-                        mAdapter.notifyDataSetChanged();
+                        adapter.notifyDataSetChanged();
 
-                        mAdapter.setLoading(false);
+                        adapter.setLoading(false);
 
                         break;
                     case 401:
                         break;
                     default:
-                        tvEmptyView.append(" - Error: "+response.code() + " - " + response.message() + " : " + call.request().url().url());
+                        tvEmptyView.append(" - Error: " + response.code() + " - " + response.message() + " : " + call.request().url().url());
                         break;
                 }
             }
@@ -169,7 +179,7 @@ public class MainActivity  extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_search:
 
-                Intent intent = new Intent(this,SearchActivity.class);
+                Intent intent = new Intent(this, SearchActivity.class);
                 startActivity(intent);
 
                 return true;

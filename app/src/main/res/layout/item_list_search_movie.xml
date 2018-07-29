@@ -39,7 +39,6 @@
                         android:textColor="@android:color/black"
                         android:textSize="18sp"
                         android:layout_gravity="center"
-                        android:text="Mission Imposible"
                         android:layout_weight="1"/>
                     <TextView
                         android:id="@+id/tv_yearfoundmovie"
@@ -48,8 +47,7 @@
                         android:layout_margin="5dp"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="10sp"
-                        android:layout_gravity="center"
-                        android:text="1984"/>
+                        android:layout_gravity="center"/>
                 </LinearLayout>
 
                 <TextView
@@ -58,8 +56,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:textColor="@android:color/black"
-                    android:textSize="10sp"
-                    android:text="Descripcion: kjñaskjdñflaksjfd ñaksjdf ñakljsd fañskdjf añskldfj añslkdjf añlskjdfañsldkjf ñalksdf alsñkdfj añklsdf añsjd fñaks dfñajkdf ñajksf fñalksjfd ñaj ñskjdf ñak"/>
+                    android:textSize="10sp"/>
             </LinearLayout>
         </LinearLayout>
 

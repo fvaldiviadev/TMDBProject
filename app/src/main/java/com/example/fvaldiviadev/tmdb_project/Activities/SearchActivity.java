@@ -33,7 +33,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class SearchActivity  extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity {
 
     private EditText searchEditText;
     private RecyclerView recyclerView;
@@ -46,18 +46,25 @@ public class SearchActivity  extends AppCompatActivity {
     int page;
 
     Call<SearchResults> call;
-    String currentSearch="";
+    String currentSearch = "";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.fragment_search);
+        setContentView(R.layout.activity_search);
 
-        searchEditText=findViewById(R.id.et_search);
-        recyclerView=findViewById(R.id.rv_searchmovielist);
-        nomoviesfoundTextView=findViewById(R.id.tv_searchnomovies);
-        pb_searchlist=findViewById(R.id.pb_searchlist);
+        initComponents();
+
+        setAdapter();
+
+    }
+
+    private void initComponents() {
+        searchEditText = findViewById(R.id.et_search);
+        recyclerView = findViewById(R.id.rv_searchmovielist);
+        nomoviesfoundTextView = findViewById(R.id.tv_searchnomovies);
+        pb_searchlist = findViewById(R.id.pb_searchlist);
 
 
         searchEditText.setOnKeyListener(listenerSearchEditText());
@@ -68,6 +75,9 @@ public class SearchActivity  extends AppCompatActivity {
 
         recyclerView.setLayoutManager(mLayoutManager);
 
+    }
+
+    private void setAdapter() {
         adapter = new SearchMovieListAdapter(recyclerView);
 
         recyclerView.setAdapter(adapter);
@@ -75,30 +85,28 @@ public class SearchActivity  extends AppCompatActivity {
         adapter.setLoading(true);
 
 
-
         adapter.setOnLoadMoreMoviesListener(new OnLoadMoreMoviesListener() {
             @Override
             public void onLoadMoreMovies() {
-                int nextPage=page+1;
-                if(nextPage<totalPages) {
+                int nextPage = page + 1;
+                if (nextPage < totalPages) {
                     search(nextPage, false);
                 }
 
             }
         });
-
     }
 
-    private View.OnKeyListener listenerSearchEditText(){
-        View.OnKeyListener listener=new View.OnKeyListener() {
+    private View.OnKeyListener listenerSearchEditText() {
+        View.OnKeyListener listener = new View.OnKeyListener() {
             @Override
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
                 String searchText = searchEditText.getText().toString();
 
-                if (keyEvent.getKeyCode() != KeyEvent.KEYCODE_BACK){
+                if (keyEvent.getKeyCode() != KeyEvent.KEYCODE_BACK) {
                     if (!currentSearch.equals(searchText) && searchText.length() > 1) {
                         search(1, true);
-                        currentSearch=searchText;
+                        currentSearch = searchText;
                     }
                 }
 
@@ -108,14 +116,14 @@ public class SearchActivity  extends AppCompatActivity {
         return listener;
     }
 
-    private void search(int searchPage, final boolean firstSearch){
+    private void search(int searchPage, final boolean firstSearch) {
 
         pb_searchlist.setVisibility(View.VISIBLE);
 
-        if(call!=null && call.isExecuted()){
+        if (call != null && call.isExecuted()) {
             call.cancel();
         }
-        page=searchPage;
+        page = searchPage;
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .create();
@@ -143,14 +151,14 @@ public class SearchActivity  extends AppCompatActivity {
 
                         SearchResults data = response.body();
 
-                        if(firstSearch){
+                        if (firstSearch) {
                             adapter.clearList();
                         }
 
-                        totalPages=data.getTotalPages();
+                        totalPages = data.getTotalPages();
 
-                        List<FoundMovie> newFoundMovieList= data.getResults();
-                        for(int i=0;i<newFoundMovieList.size();i++) {
+                        List<FoundMovie> newFoundMovieList = data.getResults();
+                        for (int i = 0; i < newFoundMovieList.size(); i++) {
                             adapter.addItem(newFoundMovieList.get(i));
                             adapter.setLoading(false);
                         }
@@ -160,7 +168,7 @@ public class SearchActivity  extends AppCompatActivity {
                         pb_searchlist.setVisibility(View.GONE);
                         break;
                     default:
-                        nomoviesfoundTextView.append(" - Error: "+response.code() + " - " + response.message() + " : " + call.request().url().url());
+                        nomoviesfoundTextView.append(" - Error: " + response.code() + " - " + response.message() + " : " + call.request().url().url());
                         break;
                 }
             }
