@@ -81,7 +81,7 @@ public class PopularMovieListAdapter extends RecyclerView.Adapter {
             RecyclerView.ViewHolder vh;
             if (viewType == VIEW_ITEM) {
                 View v = LayoutInflater.from(parent.getContext()).inflate(
-                        R.layout.popular_list_item, parent, false);
+                        R.layout.item_list_popular_movie, parent, false);
 
                 vh = new PopularMovieViewHolder(v);
             } else {
@@ -103,8 +103,6 @@ public class PopularMovieListAdapter extends RecyclerView.Adapter {
 
                 Glide.with(holder.itemView.getContext())
                         .load("https://image.tmdb.org/t/p/w500/"+popularMovie.getPosterPath())
-                        .centerCrop()
-                        .crossFade()
                         .into(((PopularMovieViewHolder) holder).ivMovie);
 
             } else {

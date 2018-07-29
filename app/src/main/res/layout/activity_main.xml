@@ -6,9 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".Activities.MainActivity">
 
-    <fragment android:name="Fragments.MainFragment"
-        android:id="@+id/headlines_fragment"
+    <RelativeLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+        <fragment android:name="Fragments.MainFragment"
+            android:id="@+id/headlines_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
+
 
 </android.support.constraint.ConstraintLayout>
