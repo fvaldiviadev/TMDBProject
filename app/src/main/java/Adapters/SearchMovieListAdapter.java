@@ -21,7 +21,6 @@ import Pojo.FoundMovie;
 public class SearchMovieListAdapter extends RecyclerView.Adapter  {
 
     private final int VIEW_ITEM = 1;
-    private final int VIEW_PROG = 0;
 
     private List<FoundMovie> foundMovieList;
 
@@ -73,27 +72,23 @@ public class SearchMovieListAdapter extends RecyclerView.Adapter  {
 
     public void clearList(){
         foundMovieList.clear();
+        notifyDataSetChanged();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return foundMovieList.get(position) != null ? VIEW_ITEM : VIEW_PROG;
+        return foundMovieList.get(position) != null ? VIEW_ITEM:null;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                       int viewType) {
-        RecyclerView.ViewHolder vh;
+        RecyclerView.ViewHolder vh=null;
         if (viewType == VIEW_ITEM) {
             View v = LayoutInflater.from(parent.getContext()).inflate(
                     R.layout.item_list_search_movie, parent, false);
 
             vh = new FoundMovieViewHolder(v);
-        } else {
-            View v = LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.progressbar, parent, false);
-
-            vh = new SearchMovieListAdapter.ProgressViewHolder(v);
         }
         return vh;
     }
@@ -105,20 +100,19 @@ public class SearchMovieListAdapter extends RecyclerView.Adapter  {
             FoundMovie foundMovie= foundMovieList.get(position);
 
             ((FoundMovieViewHolder) holder).tvTitle.setText(foundMovie.getTitle());
-            ((FoundMovieViewHolder) holder).tvDate.setText(foundMovie.getReleaseDate());
+            String dateString=foundMovie.getReleaseDate();
+            String year="-";
+            if(dateString!=null && dateString.length()>4) {
+                year = dateString.substring(0, 4);
+            }
+            ((FoundMovieViewHolder) holder).tvDate.setText(year);
             ((FoundMovieViewHolder) holder).tvOverview.setText(foundMovie.getOverview());
 
             Glide.with(holder.itemView.getContext())
                     .load("https://image.tmdb.org/t/p/w500/"+foundMovie.getPosterPath())
                     .into(((FoundMovieViewHolder) holder).ivMovie);
 
-        } else {
-            ((SearchMovieListAdapter.ProgressViewHolder) holder).progressBar.setIndeterminate(true);
         }
-    }
-
-    public void setLoading(boolean loading) {
-        this.loading = loading;
     }
 
     @Override
@@ -156,12 +150,7 @@ public class SearchMovieListAdapter extends RecyclerView.Adapter  {
         }
     }
 
-    public static class ProgressViewHolder extends RecyclerView.ViewHolder {
-        public ProgressBar progressBar;
-
-        public ProgressViewHolder(View v) {
-            super(v);
-            progressBar = (ProgressBar) v.findViewById(R.id.pb_popularmovielist);
-        }
+    public void setLoading(boolean loading) {
+        this.loading = loading;
     }
 }

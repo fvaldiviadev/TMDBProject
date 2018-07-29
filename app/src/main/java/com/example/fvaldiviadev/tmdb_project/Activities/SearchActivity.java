@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.fvaldiviadev.tmdb_project.R;
@@ -39,8 +40,13 @@ public class SearchActivity  extends AppCompatActivity {
     private LinearLayoutManager mLayoutManager;
     private SearchMovieListAdapter adapter;
     private TextView nomoviesfoundTextView;
+    private ProgressBar pb_searchlist;
+    private int totalPages;
 
     int page;
+
+    Call<SearchResults> call;
+    String currentSearch="";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,6 +57,7 @@ public class SearchActivity  extends AppCompatActivity {
         searchEditText=findViewById(R.id.et_search);
         recyclerView=findViewById(R.id.rv_searchmovielist);
         nomoviesfoundTextView=findViewById(R.id.tv_searchnomovies);
+        pb_searchlist=findViewById(R.id.pb_searchlist);
 
 
         searchEditText.setOnKeyListener(listenerSearchEditText());
@@ -63,8 +70,8 @@ public class SearchActivity  extends AppCompatActivity {
 
         adapter = new SearchMovieListAdapter(recyclerView);
 
-        // set the adapter object to the Recyclerview
         recyclerView.setAdapter(adapter);
+
         adapter.setLoading(true);
 
 
@@ -72,8 +79,10 @@ public class SearchActivity  extends AppCompatActivity {
         adapter.setOnLoadMoreMoviesListener(new OnLoadMoreMoviesListener() {
             @Override
             public void onLoadMoreMovies() {
-
-                search(++page,false);
+                int nextPage=page+1;
+                if(nextPage<totalPages) {
+                    search(nextPage, false);
+                }
 
             }
         });
@@ -84,10 +93,13 @@ public class SearchActivity  extends AppCompatActivity {
         View.OnKeyListener listener=new View.OnKeyListener() {
             @Override
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
-                String searchText=searchEditText.getText().toString();
+                String searchText = searchEditText.getText().toString();
 
-                if(searchText.length()>3){
-                    search(1,true);
+                if (keyEvent.getKeyCode() != KeyEvent.KEYCODE_BACK){
+                    if (!currentSearch.equals(searchText) && searchText.length() > 1) {
+                        search(1, true);
+                        currentSearch=searchText;
+                    }
                 }
 
                 return false;
@@ -97,6 +109,12 @@ public class SearchActivity  extends AppCompatActivity {
     }
 
     private void search(int searchPage, final boolean firstSearch){
+
+        pb_searchlist.setVisibility(View.VISIBLE);
+
+        if(call!=null && call.isExecuted()){
+            call.cancel();
+        }
         page=searchPage;
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
@@ -113,35 +131,33 @@ public class SearchActivity  extends AppCompatActivity {
         data.put("language", Constants.LANGUAGE_GET_REQUEST);
         data.put("query", searchEditText.getText().toString());
         data.put("page", String.valueOf(page));
-        Call<SearchResults> call = theMovieDBMovieService.getSearchResults(data);
+        call = theMovieDBMovieService.getSearchResults(data);
+
 
         call.enqueue(new Callback<SearchResults>() {
             @Override
             public void onResponse(Call<SearchResults> call, Response<SearchResults> response) {
                 switch (response.code()) {
                     case 200:
-
-                        //   remove progress item
-                        //foundMovieList.remove(foundMovieList.size() - 1);
-                        //adapter.notifyItemRemoved(foundMovieList.size());
+                        pb_searchlist.setVisibility(View.GONE);
 
                         SearchResults data = response.body();
 
-                        /*if(firstSearch){
+                        if(firstSearch){
                             adapter.clearList();
-                        }*/
+                        }
+
+                        totalPages=data.getTotalPages();
+
                         List<FoundMovie> newFoundMovieList= data.getResults();
                         for(int i=0;i<newFoundMovieList.size();i++) {
                             adapter.addItem(newFoundMovieList.get(i));
+                            adapter.setLoading(false);
                         }
-
-
-                        adapter.notifyDataSetChanged();
-
-                        adapter.setLoading(false);
 
                         break;
                     case 401:
+                        pb_searchlist.setVisibility(View.GONE);
                         break;
                     default:
                         nomoviesfoundTextView.append(" - Error: "+response.code() + " - " + response.message() + " : " + call.request().url().url());

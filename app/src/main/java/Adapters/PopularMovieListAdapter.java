@@ -16,6 +16,7 @@ import java.util.List;
 
 import Interfaces.OnLoadMoreMoviesListener;
 import Pojo.PopularMovie;
+import Utils.Constants;
 
 public class PopularMovieListAdapter extends RecyclerView.Adapter {
         private final int VIEW_ITEM = 1;
@@ -102,7 +103,7 @@ public class PopularMovieListAdapter extends RecyclerView.Adapter {
                 ((PopularMovieViewHolder) holder).tvTitle.setText(popularMovie.getTitle());
 
                 Glide.with(holder.itemView.getContext())
-                        .load("https://image.tmdb.org/t/p/w500/"+popularMovie.getPosterPath())
+                        .load(Constants.URL_IMAGE_DEFAULT+popularMovie.getPosterPath())
                         .into(((PopularMovieViewHolder) holder).ivMovie);
 
             } else {
