@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -66,8 +68,7 @@ public class SearchActivity extends AppCompatActivity {
         nomoviesfoundTextView = findViewById(R.id.tv_searchnomovies);
         pb_searchlist = findViewById(R.id.pb_searchlist);
 
-
-        searchEditText.setOnKeyListener(listenerSearchEditText());
+        searchEditText.addTextChangedListener(listenerTextWatcher());
 
         recyclerView.setHasFixedSize(true);
 
@@ -97,23 +98,30 @@ public class SearchActivity extends AppCompatActivity {
         });
     }
 
-    private View.OnKeyListener listenerSearchEditText() {
-        View.OnKeyListener listener = new View.OnKeyListener() {
+
+    private TextWatcher listenerTextWatcher(){
+        TextWatcher textWatcher=new TextWatcher() {
             @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String searchText = searchEditText.getText().toString();
 
-                if (keyEvent.getKeyCode() != KeyEvent.KEYCODE_BACK) {
-                    if (!currentSearch.equals(searchText) && searchText.length() > 1) {
-                        search(1, true);
-                        currentSearch = searchText;
-                    }
+                if (!currentSearch.equals(searchText) && searchText.length() > 1) {
+                    search(1, true);
+                    currentSearch = searchText;
                 }
+            }
 
-                return false;
+            @Override
+            public void afterTextChanged(Editable editable) {
+
             }
         };
-        return listener;
+        return textWatcher;
     }
 
     private void search(int searchPage, final boolean firstSearch) {
